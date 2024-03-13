@@ -1,12 +1,15 @@
 package com.betrybe.agrix.services;
 
+import com.betrybe.agrix.exceptions.FarmNotFoundException;
 import com.betrybe.agrix.models.entities.Farm;
 import com.betrybe.agrix.models.repositories.FarmRepository;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Farm Service.
+ * Service responsible for handling farm-related operations.
  */
 @Service
 public class FarmService {
@@ -14,22 +17,32 @@ public class FarmService {
   private final FarmRepository farmRepository;
 
   /**
-   * Constructor com injeção de dependência para o FarmRepository.
-   *
-   * @param farmRepository FarmRepository
+   * Constructs a new FarmService with the specified FarmRepository.
    */
   public FarmService(FarmRepository farmRepository) {
     this.farmRepository = farmRepository;
   }
 
   /**
-   * Cria uma nova fazenda e a salva no banco de dados.
-   *
-   * @param farm Farm
-   * @return Farm salva
+   * Creates a new farm and saves it to the database.
    */
   @Transactional
   public Farm create(Farm farm) {
     return farmRepository.save(farm);
+  }
+
+  /**
+   * Retrieves a list of all farms saved in the database.
+   */
+  public List<Farm> getAllFarms() {
+    return farmRepository.findAll();
+  }
+
+  /**
+  * Retrieves a specific farm by its ID.
+  */
+  public Farm getById(Long id) {
+    return farmRepository.findById(id)
+    .orElseThrow(() -> new FarmNotFoundException());
   }
 }
