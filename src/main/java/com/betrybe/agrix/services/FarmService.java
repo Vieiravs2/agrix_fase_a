@@ -42,7 +42,12 @@ public class FarmService {
   * Retrieves a specific farm by its ID.
   */
   public Farm getById(Long id) {
-    return farmRepository.findById(id)
-    .orElseThrow(() -> new FarmNotFoundException());
+    Optional<Farm> farm = farmRepository.findById(id);
+
+    if (!farm.isEmpty()) {
+      return farm.get();
+    }
+
+    throw new FarmNotFoundException();
   }
 }
