@@ -1,7 +1,9 @@
 package com.betrybe.agrix.services;
 
 import com.betrybe.agrix.exceptions.FarmNotFoundException;
+import com.betrybe.agrix.models.entities.Crop;
 import com.betrybe.agrix.models.entities.Farm;
+import com.betrybe.agrix.models.repositories.CropRepository;
 import com.betrybe.agrix.models.repositories.FarmRepository;
 import java.util.List;
 import java.util.Optional;
@@ -15,12 +17,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class FarmService {
 
   private final FarmRepository farmRepository;
+  private final CropRepository cropRepository;
 
   /**
    * Constructs a new FarmService with the specified FarmRepository.
    */
-  public FarmService(FarmRepository farmRepository) {
+  public FarmService(FarmRepository farmRepository, CropRepository cropRepository) {
     this.farmRepository = farmRepository;
+    this.cropRepository = cropRepository;
   }
 
   /**
@@ -49,5 +53,22 @@ public class FarmService {
     }
 
     throw new FarmNotFoundException();
+  }
+
+  /**
+  * Retrieves the farm with the specified ID.
+  */
+  private Farm retrieveFarmById(Long farmId) {
+    Optional<Farm> optionalFarm = farmRepository.findById(farmId);
+    return optionalFarm.orElseThrow(FarmNotFoundException::new);
+  }
+
+  /**
+  * Creates a new crop for the specified farm and saves it to the database.
+  */
+  public Crop createCrop(Long farmId, Crop newCrop) {
+    Farm farm = retrieveFarmById(farmId);
+    newCrop.setFarm(farm);
+    return cropRepository.save(newCrop);
   }
 }
