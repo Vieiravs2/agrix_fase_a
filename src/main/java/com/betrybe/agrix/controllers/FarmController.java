@@ -6,6 +6,7 @@ import com.betrybe.agrix.models.entities.Crop;
 import com.betrybe.agrix.models.entities.Farm;
 import com.betrybe.agrix.services.FarmService;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Controller responsible for handling farm-related endpoints.
  */
 @RestController
-@RequestMapping("/farms")
+@RequestMapping()
 public class FarmController {
 
   private final FarmService farmService;
@@ -35,7 +36,7 @@ public class FarmController {
   /**
    * Creates a new farm based on the provided FarmDto.
    */
-  @PostMapping
+  @PostMapping("/farms")
   public ResponseEntity<FarmDto> createFarm(@RequestBody FarmDto farmDto) {
     Farm farm = farmService.create(farmDto.toEntity());
     FarmDto createdFarmDto = new FarmDto(farm.getId(), farm.getName(), farm.getSize());
@@ -54,9 +55,9 @@ public class FarmController {
   /**
    * Retrieves a specific farm by its ID.
    */
-  @GetMapping("/{id}")
-  public ResponseEntity<Farm> getById(@PathVariable Long id) {
-    Farm farm = farmService.getById(id);
+  @GetMapping("/farms/{id}")
+  public ResponseEntity<Farm> getFarmById(@PathVariable Long id) {
+    Farm farm = farmService.getFarmById(id);
     return ResponseEntity.ok(farm);
   }
 
@@ -70,7 +71,7 @@ public class FarmController {
   /**
   * Creates a new crop for the farm with the specified ID.
   */
-  @PostMapping(value = "/{id}/crops")
+  @PostMapping(value = "/farms/{id}/crops")
   public ResponseEntity<CropDto> createCrop(@PathVariable("id") Long farmId, 
       @RequestBody CropDto cropDto) {
     Crop createdCrop = farmService.createCrop(farmId, cropDto.toEntity());
@@ -79,9 +80,9 @@ public class FarmController {
   }
 
   /**
-   * Retrieves a list of all crops for the farm with the specified ID.
+   * Retrieves a list of all crops farms for the farm with the specified ID.
    */
-  @GetMapping("/{id}/crops")
+  @GetMapping("/farms/{id}/crops")
   public ResponseEntity<List<CropDto>> getAllCrops(@PathVariable("id") Long farmId) {
     List<Crop> crops = farmService.getAllCrops(farmId);
     List<CropDto> cropDtos = mapToCropDtoList(crops, farmId);
@@ -89,8 +90,40 @@ public class FarmController {
   }
 
   /**
-   * Maps a list of Crop entities to a list of CropDto objects.
+   * Returns a list of all crops.
    */
+  @GetMapping("/crops")
+  public ResponseEntity<List<CropDto.ToResponse>> getAllCrops() {
+    List<Crop> crops = farmService.getAllCrops();
+    List<CropDto.ToResponse> cropDtos = mapToCropDtoList(crops);
+    return ResponseEntity.ok().body(cropDtos);
+  }
+
+  /**
+  * Retrieves a specific crop by its ID.
+  */
+  @GetMapping("/crops/{id}")
+  public ResponseEntity<?> getCropById(@PathVariable Long id) {
+    Optional<Crop> cropOptional = farmService.getCropById(id);
+
+    if (cropOptional.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Plantação não encontrada!");
+    }
+
+    CropDto.ToResponse response = CropDto.fromEntity(cropOptional.get());
+    return ResponseEntity.ok(response);
+  }
+
+
+  private List<CropDto.ToResponse> mapToCropDtoList(List<Crop> crops) {
+    return crops.stream()
+      .map(CropDto::fromEntity)
+      .collect(Collectors.toList());
+  }
+
+  /**
+  * Maps a list of Crop entities to a list of CropDto objects.
+  */
   private List<CropDto> mapToCropDtoList(List<Crop> crops, Long farmId) {
     return crops.stream()
       .map(crop -> new CropDto(crop.getId(), crop.getName(), crop.getPlantedArea(), farmId))

@@ -45,7 +45,7 @@ public class FarmService {
   /**
   * Retrieves a specific farm by its ID.
   */
-  public Farm getById(Long id) {
+  public Farm getFarmById(Long id) {
     Optional<Farm> farm = farmRepository.findById(id);
 
     if (!farm.isEmpty()) {
@@ -73,7 +73,15 @@ public class FarmService {
   }
 
   public List<Crop> getAllCrops(Long farmId) {
-    Farm farm = getById(farmId);
+    Farm farm = getFarmById(farmId);
     return cropRepository.findByFarm(farm);
+  }
+
+  public List<Crop> getAllCrops() {
+    return cropRepository.findAll();
+  }
+
+  public Optional<Crop> getCropById(Long farmId) {
+    return cropRepository.findById(farmId);
   }
 }
