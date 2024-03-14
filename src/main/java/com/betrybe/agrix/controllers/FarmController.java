@@ -6,6 +6,7 @@ import com.betrybe.agrix.models.entities.Crop;
 import com.betrybe.agrix.models.entities.Farm;
 import com.betrybe.agrix.services.FarmService;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -75,5 +76,24 @@ public class FarmController {
     Crop createdCrop = farmService.createCrop(farmId, cropDto.toEntity());
     CropDto createdCropDto = mapToCropDto(createdCrop, farmId);
     return ResponseEntity.status(HttpStatus.CREATED).body(createdCropDto);
+  }
+
+  /**
+   * Retrieves a list of all crops for the farm with the specified ID.
+   */
+  @GetMapping("/{id}/crops")
+  public ResponseEntity<List<CropDto>> getAllCrops(@PathVariable("id") Long farmId) {
+    List<Crop> crops = farmService.getAllCrops(farmId);
+    List<CropDto> cropDtos = mapToCropDtoList(crops, farmId);
+    return ResponseEntity.ok(cropDtos);
+  }
+
+  /**
+   * Maps a list of Crop entities to a list of CropDto objects.
+   */
+  private List<CropDto> mapToCropDtoList(List<Crop> crops, Long farmId) {
+    return crops.stream()
+      .map(crop -> new CropDto(crop.getId(), crop.getName(), crop.getPlantedArea(), farmId))
+      .collect(Collectors.toList());
   }
 }
