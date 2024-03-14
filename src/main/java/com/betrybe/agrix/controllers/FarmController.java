@@ -46,7 +46,7 @@ public class FarmController {
   /**
    * Retrieves a list of all farms saved in the database.
    */
-  @GetMapping
+  @GetMapping("/farms")
   public ResponseEntity<List<Farm>> getAllFarms() {
     List<Farm> allFarms = farmService.getAllFarms();
     return ResponseEntity.ok(allFarms);
